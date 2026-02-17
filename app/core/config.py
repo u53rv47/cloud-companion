@@ -19,15 +19,10 @@ class Settings(BaseSettings):
     DEBUG: bool = Field(default=False, description="Enable debug mode")
 
     API_V1_PREFIX: str = "/api/v1"
-    BASE_URL: str = Field(default="http://localhost:8000")
-
-    SERVER_HOST: str = Field(default="0.0.0.0")
-    SERVER_PORT: int = Field(default=8000)
+    LOG_LEVEL: str = Field(default="INFO")
 
     ALLOWED_HOSTS: List[str] = Field(default=["*"])
     CORS_ORIGINS: List[str] = Field(default=["*"])
-
-    LOG_LEVEL: str = Field(default="INFO")
 
     @field_validator("ALLOWED_HOSTS", "CORS_ORIGINS", mode="before")
     @classmethod
@@ -36,8 +31,8 @@ class Settings(BaseSettings):
             return [item.strip() for item in v.split(",")]
         return v
 
-    NEO4J_URI: str = Field(default="bolt://localhost:7687")
-    NEO4J_USER: str = Field(default="neo4j")
+    NEO4J_URI: str = Field(default="bolt://neo4j:7687")
+    NEO4J_USER: str = Field(default="companion")
     NEO4J_PASSWORD: str = Field(default="")
     NEO4J_DATABASE: str = Field(default="neo4j")
 
@@ -48,30 +43,21 @@ class Settings(BaseSettings):
             raise ValueError("NEO4J_PASSWORD cannot be empty")
         return v
 
-    WEAVIATE_URL: str = Field(default="http://localhost:8080")
+    WEAVIATE_URL: str = Field(default="http://weaviate:8080")
     WEAVIATE_API_KEY: str = Field(default="")
 
-    ENCRYPTION_KEY: str = Field(default="")
+    API_HMAC_SECRET: str = Field(default="")
 
-    @field_validator("ENCRYPTION_KEY")
+    @field_validator("API_HMAC_SECRET")
     @classmethod
-    def validate_encryption_key(cls, v: str) -> str:
+    def validate_api_hmac_secret(cls, v: str) -> str:
         if not v:
-            raise ValueError("ENCRYPTION_KEY must be set for secure operations")
+            raise ValueError("API_HMAC_SECRET must be set for secure operations")
         return v
 
-    LLM_PROVIDER: str = Field(default="ollama")
-    LLM_MODEL: str = Field(default="llama2")
-    LLM_API_KEY: str = Field(default="")
-    LLM_BASE_URL: str = Field(default="http://localhost:11434")
-    LLM_TEMPERATURE: float = Field(default=0.7, ge=0.0, le=2.0)
-    LLM_MAX_TOKENS: int = Field(default=2048, gt=0)
-
-    AWS_REGION: str = Field(default="us-east-1")
+    AWS_ACCOUNT_ID: str = Field(default="")
     AZURE_SUBSCRIPTION_ID: str = Field(default="")
     GCP_PROJECT_ID: str = Field(default="")
-
-    API_KEY_EXPIRY_DAYS: int = Field(default=90, gt=0)
 
     class Config:
         env_file = ".env"

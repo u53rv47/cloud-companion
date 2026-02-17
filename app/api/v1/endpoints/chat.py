@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, Depends, status, HTTPException, WebSocket, WebSocketDisconnect
-from app.dependencies import RequestContext, get_request_context
+from app.api.deps import RequestContext, get_request_context
 from app.models.schemas import ChatMessageRequest, ChatResponse
 from app.services.neo4j import Neo4jService
 from app.services.weaviate import WeaviateService

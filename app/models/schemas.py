@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from app.core.constants import CloudProvider, SkillLevel, APIKeyStatus
+from app.core.constants import CloudProvider, APIKeyStatus
 
 
 class OrganizationBase(BaseModel):

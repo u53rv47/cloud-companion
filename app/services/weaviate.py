@@ -9,15 +9,12 @@ logger = logging.getLogger(__name__)
 class WeaviateService:
     def __init__(self):
         self.url = settings.WEAVIATE_URL
-        self.api_key = settings.WEAVIATE_API_KEY
         self.client = None
 
     async def connect(self) -> None:
         try:
             import weaviate
-            from weaviate.auth import AuthApiKey
 
-            auth = AuthApiKey(api_key=self.api_key) if self.api_key else None
             self.client = weaviate.connect_to_local(
                 host=self.url.replace("http://", "").split(":")[0],
                 grpc_port=int(self.url.split(":")[-1]) + 1000 if ":" in self.url else 50051,

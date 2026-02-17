@@ -1,19 +1,21 @@
-from typing import Optional, Dict, Any, List
 from datetime import datetime
+from typing import Optional, Dict, Any
+from uuid import uuid4
+from app.core.constants import CloudProvider
 
 
 class Organization:
     def __init__(
         self,
-        id: str,
         name: str,
         description: Optional[str] = None,
+        id: Optional[str] = None,
         created_at: Optional[datetime] = None,
     ):
-        self.id = id
+        self.id = id or str(uuid4())
         self.name = name
         self.description = description
-        self.created_at = created_at or datetime.utcnow()
+        self.created_at = created_at or datetime.now()
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -27,15 +29,13 @@ class Organization:
 class CloudAccount:
     def __init__(
         self,
-        id: str,
         org_id: str,
         name: str,
-        provider: str,
+        provider: CloudProvider,
         account_id: str,
         created_at: Optional[datetime] = None,
         last_synced: Optional[datetime] = None,
     ):
-        self.id = id
         self.org_id = org_id
         self.name = name
         self.provider = provider
@@ -45,72 +45,40 @@ class CloudAccount:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "id": self.id,
             "org_id": self.org_id,
             "name": self.name,
-            "provider": self.provider,
+            "provider": self.provider.value,
             "account_id": self.account_id,
             "created_at": self.created_at.isoformat(),
             "last_synced": self.last_synced.isoformat() if self.last_synced else None,
         }
 
 
-class CloudResource:
-    def __init__(
-        self,
-        id: str,
-        org_id: str,
-        name: str,
-        resource_type: str,
-        provider: str,
-        account_id: str,
-        metadata: Optional[Dict[str, Any]] = None,
-        created_at: Optional[datetime] = None,
-    ):
-        self.id = id
-        self.org_id = org_id
-        self.name = name
-        self.resource_type = resource_type
-        self.provider = provider
-        self.account_id = account_id
-        self.metadata = metadata or {}
-        self.created_at = created_at or datetime.utcnow()
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "id": self.id,
-            "org_id": self.org_id,
-            "name": self.name,
-            "resource_type": self.resource_type,
-            "provider": self.provider,
-            "account_id": self.account_id,
-            "metadata": self.metadata,
-            "created_at": self.created_at.isoformat(),
-        }
-
-
 class APIKey:
     def __init__(
         self,
-        id: str,
         org_id: str,
         name: str,
         hashed_key: str,
-        status: str = "active",
+        id: Optional[str] = None,
+        is_active: bool = True,
         created_at: Optional[datetime] = None,
+        expires_at: Optional[datetime] = None,
     ):
-        self.id = id
+        self.id = id or str(uuid4())
         self.org_id = org_id
         self.name = name
         self.hashed_key = hashed_key
-        self.status = status
-        self.created_at = created_at or datetime.utcnow()
+        self.is_active = is_active
+        self.created_at = created_at or datetime.now()
+        self.expires_at = expires_at
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
             "org_id": self.org_id,
             "name": self.name,
-            "status": self.status,
+            "is_active": self.is_active,
             "created_at": self.created_at.isoformat(),
+            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
         }

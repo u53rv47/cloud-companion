@@ -3,34 +3,34 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
 from app.core.logging import setup_logging
 from app.middleware.error_handler import setup_exception_handlers
 from app.middleware.logging import LoggingMiddleware
 from app.api.v1.router import router as v1_router
 from app.api.health import router as health_router
-from app.services.neo4j import Neo4jService
-from app.services.weaviate import WeaviateService
+from app.core.application import Application
+from app.core.migrate import get_latest_migration_version
+from app.core.config import settings
 
 # Root directory of the cloud-companion project
 ROOT_DIR = Path(__file__).parent.parent
 
 logger = logging.getLogger("cloud-companion")
 
-neo4j_service = Neo4jService()
-weaviate_service = WeaviateService()
+app_instance = Application()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting application")
-    await neo4j_service.connect()
+    await app_instance.start()
 
-    await weaviate_service.connect()
+    version = await get_latest_migration_version(app_instance.neo4j)
+    if not version:
+        raise RuntimeError("Database not migrated. Run `cc migrate` before starting APP.")
+
+    app.state.app = app_instance
     yield
-    logger.info("Shutting down application")
-    await neo4j_service.close()
-    await weaviate_service.close()
+    await app_instance.stop()
 
 
 def create_application() -> FastAPI:

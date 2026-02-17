@@ -7,27 +7,29 @@ class CloudProvider(str, Enum):
     GCP = "gcp"
 
 
-class SkillLevel(str, Enum):
-    BEGINNER = "Beginner"
-    INTERMEDIATE = "Intermediate"
-    PROFESSIONAL = "Pro"
-
-
 class APIKeyStatus(str, Enum):
     ACTIVE = "active"
     REVOKED = "revoked"
     EXPIRED = "expired"
 
 
-class ResourceType(str, Enum):
-    EC2 = "ec2"
-    RDS = "rds"
-    S3 = "s3"
-    VPC = "vpc"
-    LAMBDA = "lambda"
-    IAM = "iam"
-    CLOUDWATCH = "cloudwatch"
-    AZURE_VM = "azure_vm"
-    AZURE_SQL = "azure_sql"
-    GCP_COMPUTE = "gcp_compute"
-    GCP_STORAGE = "gcp_storage"
+from enum import Enum
+
+
+class ResourceType:
+    class AWS(str, Enum):
+        EC2 = "aws_ec2"
+        RDS = "aws_rds"
+        S3 = "aws_s3"
+        VPC = "aws_vpc"
+        LAMBDA = "aws_lambda"
+        IAM = "aws_iam"
+        CLOUDWATCH = "aws_cloudwatch"
+
+    class AZURE(str, Enum):
+        VM = "azure_vm"
+        SQL = "azure_sql"
+
+    class GCP(str, Enum):
+        COMPUTE = "gcp_compute"
+        STORAGE = "gcp_storage"

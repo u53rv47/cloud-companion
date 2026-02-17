@@ -1,7 +1,7 @@
 import logging
 import uuid
 from fastapi import APIRouter, Depends, status, HTTPException
-from app.dependencies import RequestContext, get_request_context
+from app.api.deps import RequestContext, get_request_context
 from app.models.schemas import APIKeyResponse, APIKeyCreate
 from app.services.neo4j import Neo4jService
 from app.core.security import generate_api_key, hash_api_key

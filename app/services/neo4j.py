@@ -1,5 +1,5 @@
 from app.core import logging
-from neo4j import AsyncGraphDatabase, AsyncSession
+from neo4j import AsyncGraphDatabase, Query
 from app.core.config import settings
 from app.core.exceptions import DatabaseError
 from typing import Any, Dict, List, Optional
@@ -31,7 +31,7 @@ class Neo4jService:
             logger.info("Disconnected from Neo4j")
 
     async def execute_query(
-        self, query: str, parameters: Optional[Dict[str, Any]] = None
+        self, query: str | Query, parameters: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Any]]:
         if not self.driver:
             raise DatabaseError("Neo4j driver not initialized")
