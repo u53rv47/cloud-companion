@@ -7,24 +7,26 @@ class CloudAccountRepository:
     def __init__(self, driver: Neo4jService):
         self.driver = driver
 
-    async def create(self, account: CloudAccount):
+    async def create(self, account: CloudAccount) -> CloudAccount | None:
         query = """
         MATCH (o:Organization {id: $org_id})
         CREATE (c:CloudAccount $props)
-        CREATE (o)-[:HAS_ACCOUNT]->(c)
+        CREATE (o)-[:OWNS]->(c)
         RETURN c
         """
-        return await self.driver.execute_query(
+        results = await self.driver.execute_query(
             query,
             {
                 "org_id": account.org_id,
                 "props": account.to_dict(),
             },
         )
+        return CloudAccount(**results[0]["c"]) if results else None
 
-    async def list(self, org_id: str) -> List[Dict]:
+    async def list(self, org_id: str) -> List[CloudAccount]:
         query = """
-        MATCH (o:Organization {id: $org_id})-[:HAS_ACCOUNT]->(c)
+        MATCH (o:Organization {id: $org_id})-[:OWNS]->(c)
         RETURN c
         """
-        return await self.driver.execute_query(query, {"org_id": org_id})
+        results = await self.driver.execute_query(query, {"org_id": org_id})
+        return [CloudAccount(**r["c"]) for r in results]

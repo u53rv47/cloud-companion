@@ -4,7 +4,6 @@ from app.core.config import settings
 from app.core.exceptions import DatabaseError
 from typing import Any, Dict, List, Optional
 
-
 logger = logging.get_logger("neo4j")
 
 
@@ -52,17 +51,17 @@ class Neo4jService:
         """
         try:
             results = await self.execute_query(query, {"props": properties})
-            return results[0] if results else None
+            return results[0]["n"] if results else None
         except Exception as e:
             logger.error(f"Failed to create node: {str(e)}")
             raise
 
     async def find_node(self, label: str, properties: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        props_match = " AND ".join([f"n.{k} = ${k}" for k in properties.keys()])
+        props_match = ", ".join([f"{k}: ${k}" for k in properties.keys()])
         query = f"MATCH (n:{label} {{{props_match}}}) RETURN n"
         try:
             results = await self.execute_query(query, properties)
-            return results[0] if results else None
+            return results[0]["n"] if results else None
         except Exception as e:
             logger.error(f"Failed to find node: {str(e)}")
             raise

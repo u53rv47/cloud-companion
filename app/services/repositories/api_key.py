@@ -7,28 +7,29 @@ class APIKeyRepository:
     def __init__(self, driver: Neo4jService):
         self.driver = driver
 
-    async def create(self, key: APIKey):
+    async def create(self, key: APIKey) -> APIKey | None:
         query = """
         MATCH (o:Organization {id: $org_id})
         CREATE (k:APIKey $props)
         CREATE (o)-[:HAS_API_KEY]->(k)
         RETURN k
         """
-        return await self.driver.execute_query(
+        results = await self.driver.execute_query(
             query,
             {
                 "org_id": key.org_id,
                 "props": key.to_dict() | {"hashed_key": key.hashed_key},
             },
         )
+        return APIKey(**results[0]["k"]) if results else None
 
-    async def find_by_hash(self, hashed: str) -> Optional[Dict]:
+    async def list(self, org_id: str) -> List[APIKey]:
         query = """
-        MATCH (k:APIKey {hashed_key: $hash})
+        MATCH (o:Organization {id: $org_id})-[:HAS_API_KEY]->(k)
         RETURN k
         """
-        results = await self.driver.execute_query(query, {"hash": hashed})
-        return results[0] if results else None
+        results = await self.driver.execute_query(query, {"org_id": org_id})
+        return [APIKey(**r["k"]) for r in results]
 
     async def revoke(self, key_id: str):
         query = """
@@ -37,9 +38,10 @@ class APIKeyRepository:
         """
         await self.driver.execute_query(query, {"id": key_id})
 
-    async def list(self, org_id: str) -> List[Dict]:
+    async def find_by_hash(self, hashed: str) -> APIKey | None:
         query = """
-        MATCH (o:Organization {id: $org_id})-[:HAS_API_KEY]->(k)
+        MATCH (k:APIKey {hashed_key: $hash})
         RETURN k
         """
-        return await self.driver.execute_query(query, {"org_id": org_id})
+        results = await self.driver.execute_query(query, {"hash": hashed})
+        return APIKey(**results[0]["k"]) if results else None

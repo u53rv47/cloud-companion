@@ -1,7 +1,7 @@
 import hmac
 import hashlib
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import Request, Header, HTTPException, Depends
 from app.core.application import Application
 from app.core.config import settings
@@ -27,26 +27,21 @@ async def verify_api_key(
 ):
     key_hash = hash_api_key(x_api_key)
 
-    record = await app.api_key_repo.find_by_hash(key_hash)
+    key_node = await app.api_key_repo.find_by_hash(key_hash)
 
-    if not record:
+    if not key_node:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    key_node = record["k"]
-    org_id = record["org_id"]
-
-    if not key_node.get("is_active", True):
+    if not key_node.is_active:
         raise HTTPException(status_code=403, detail="API key disabled")
 
-    expires_at = key_node.get("expires_at")
+    expires_at = key_node.expires_at
     if expires_at:
-        # Neo4j datetime is not Python datetime
-        expires_at = expires_at.to_native() if hasattr(expires_at, "to_native") else expires_at
-        if expires_at < datetime.utcnow():
+        if expires_at < datetime.now(timezone.utc):
             raise HTTPException(status_code=403, detail="API key expired")
 
     return {
-        "org_id": org_id,
-        "key_id": key_node.get("id"),
-        "name": key_node.get("name"),
+        "org_id": key_node.org_id,
+        "key_id": key_node.id,
+        "name": key_node.name,
     }

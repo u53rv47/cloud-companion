@@ -7,20 +7,29 @@ class OrganizationRepository:
     def __init__(self, driver: Neo4jService):
         self.driver = driver
 
-    async def create(self, org: Organization) -> Dict:
+    async def create(self, org: Organization) -> Organization | None:
         query = """
         CREATE (o:Organization $props)
         RETURN o
         """
-        result = await self.driver.execute_query(query, {"props": org.to_dict()})
-        return result[0] if result else None
+        results = await self.driver.execute_query(query, {"props": org.to_dict()})
+        return Organization(**results[0]["o"]) if results else None
 
-    async def list(self) -> List[Dict]:
+    async def get_by_name(self, name: str) -> Organization | None:
+        query = """
+        MATCH (o:Organization {name: $name})
+        RETURN o
+        """
+        results = await self.driver.execute_query(query, {"name": name})
+        return Organization(**results[0]["o"]) if results else None
+
+    async def list(self) -> List[Organization]:
         query = """
         MATCH (o:Organization)
         RETURN o
         """
-        return await self.driver.execute_query(query)
+        results = await self.driver.execute_query(query)
+        return [Organization(**r["o"]) for r in results]
 
     async def delete(self, org_id: str) -> None:
         query = """
