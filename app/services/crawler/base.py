@@ -3,7 +3,7 @@ import uuid
 from typing import Optional
 from app.services.neo4j import Neo4jService
 from app.core.exceptions import ResourceNotFoundError
-from app.models.neo4j_models import CloudResource
+from app.models.graph import CloudResource
 
 logger = logging.getLogger(__name__)
 

@@ -27,7 +27,7 @@ async def verify_api_key(
 ):
     key_hash = hash_api_key(x_api_key)
 
-    key_node = await app.api_key_repo.find_by_hash(key_hash)
+    key_node = await app.repo.organization.find_api_key_by_hash(key_hash)
 
     if not key_node:
         raise HTTPException(status_code=401, detail="Invalid API key")

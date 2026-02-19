@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Dict, Any
 from app.services.crawler.base import CloudCrawlerBase
-from app.models.neo4j_models import CloudResource
+from app.models.graph import CloudResource
 from app.core.exceptions import CloudAPIError
 
 logger = logging.getLogger(__name__)

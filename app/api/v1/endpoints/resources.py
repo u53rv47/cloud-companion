@@ -2,7 +2,7 @@ import logging
 import uuid
 from fastapi import APIRouter, Depends, status, HTTPException
 from app.api.deps import RequestContext, get_request_context
-from app.models.schemas import CloudResourceResponse
+from app.models.schema import CloudResourceResponse
 from app.services.neo4j import Neo4jService
 
 logger = logging.getLogger(__name__)

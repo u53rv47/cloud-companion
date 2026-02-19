@@ -1,11 +1,16 @@
 import logging
 from app.services.neo4j import Neo4jService
 from app.services.weaviate import WeaviateService
+
 from app.services.repositories.organization import OrganizationRepository
-from app.services.repositories.cloud_account import CloudAccountRepository
-from app.services.repositories.api_key import APIKeyRepository
+from app.services.repositories.resource import ResourceRepository
 
 logger = logging.getLogger("cloud-companion")
+
+
+class Repositories:
+    def __init__(self, neo4j):
+        self.organization = OrganizationRepository(neo4j)
 
 
 class Application:
@@ -22,10 +27,7 @@ class Application:
         await self.neo4j.connect()
         await self.weaviate.connect()
 
-        # repositories
-        self.org_repo = OrganizationRepository(self.neo4j)
-        self.account_repo = CloudAccountRepository(self.neo4j)
-        self.api_key_repo = APIKeyRepository(self.neo4j)
+        self.repo = Repositories(self.neo4j)
 
         self.started = True
         logger.info("Application started")

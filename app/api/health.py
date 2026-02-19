@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, Depends
 from app.api.deps import get_app
 from app.core.application import Application
-from app.models.schemas import HealthResponse
+from app.models.schema import HealthResponse
 
 logger = logging.getLogger(__name__)
 

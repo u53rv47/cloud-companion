@@ -4,7 +4,7 @@ from rich import print
 from datetime import datetime, timezone, timedelta
 from app.cli.utils import with_app
 from app.core.application import Application
-from app.models.neo4j_models import APIKey
+from app.models.graph import APIKey
 from app.api.deps import hash_api_key
 
 cli = typer.Typer()
@@ -13,7 +13,7 @@ cli = typer.Typer()
 @cli.command()
 @with_app()
 async def create(app: Application, org_name: str, name: str, days_valid: int = 30):
-    org = await app.org_repo.get_by_name(org_name)
+    org = await app.repo.organization.get_org_by_name(org_name)
     if not org:
         print(f"[red]Error:[/red] Organization '[bold]{org_name}[/bold]' not found.")
         raise typer.Exit(code=1)
@@ -27,7 +27,7 @@ async def create(app: Application, org_name: str, name: str, days_valid: int = 3
         expires_at=expires.isoformat(),
     )
 
-    await app.api_key_repo.create(key_data)
+    await app.repo.organization.create_api_key(key_data)
 
     print("\n[green]✔ API Key created successfully[/green]")
     print(f"Organization: [cyan]{org.name}[/cyan]")
@@ -40,13 +40,13 @@ async def create(app: Application, org_name: str, name: str, days_valid: int = 3
 @cli.command()
 @with_app()
 async def revoke(app: Application, key_id: str):
-    await app.api_key_repo.revoke(key_id)
+    await app.repo.organization.revoke_api_key(key_id)
     print("[yellow]Key revoked[/yellow]")
 
 
 @cli.command()
 @with_app()
 async def list(app: Application, org_id: str):
-    keys = await app.api_key_repo.list(org_id)
+    keys = await app.repo.organization.list_api_keys(org_id)
     for r in keys:
         print(f"{r.id} | {r.name} | Active: {r.is_active}")
